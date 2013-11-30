@@ -81,7 +81,7 @@ if __name__ == '__main__':
 
 	if DEBUG:
 		print searchTerm
-	listOfChanges = searchForTermWithLimit(searchTerm, 2)
+	listOfChanges = searchForTermWithLimit(searchTerm, 10)
 
 	result = "{ \"commits\": " + json.dumps(listOfChanges, default=encode_changeDesc, indent=4, separators=(',', ': ')) + "}";
 	print result
