@@ -1,1 +1,65 @@
-Delphi is a website where engineers go to find out about git history
+<!DOCTYPE html>
+<html>
+<head>
+    <TITLE>My first HTML document</TITLE>
+    <link rel="stylesheet" href="genesis.css"></head>
+<body>
+    <div id="placeholder">This will get replaced by handlebars.js</div>
+
+    <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/handlebars.js/1.0.rc.1/handlebars.min.js"></script>
+    <script id="changeDescriptionTemplate" type="text/x-handlebars-template">
+        {{#commits}}
+        <div class="header-bar", style="width:768px"> 
+        <div class="header", style="height:32px">
+            <div class="change_author", style="width:25%; float:left">{{author}}</div>
+            <div class="change_date", style="width:25%; float:left">{{date}}</div>
+            <div class="change_score", style="width:25%; float:left">{{impact}}</div>
+        </div>
+        <div class="change_message">{{message}}</div>
+        </div>
+        <br>
+        {{/commits}}
+    </script>
+
+    <script type="text/javascript">
+
+    function fetchResults() {
+        var url = "http://localhost:8888/delphi/oracle.py?searchterm=registration";
+        xmlHttp = new XMLHttpRequest();
+        xmlHttp.onreadystatechange = processRequest;
+        xmlHttp.open( "GET", url, true );
+        xmlHttp.send( null );
+    }
+
+    function processRequest()  {
+        if ( xmlHttp.readyState == 4 && xmlHttp.status == 200 )  {
+            if ( xmlHttp.responseText == "Not found" )  {
+                alert("Not found");
+            } else {
+                layoutSearchResultsWithData(xmlHttp.responseText);
+            }                    
+        }
+}
+
+    function layoutSearchResultsWithData(data) {
+        console.log(data)
+
+       if (typeof data == 'string') {
+            data = JSON.parse(data);
+        }
+
+        var source = document.getElementById("changeDescriptionTemplate").innerHTML;
+        var template = Handlebars.compile(source);            
+        document.getElementById("placeholder").innerHTML = template(data);
+    }
+
+    function onLoadHandler() {
+        fetchResults();
+    }
+
+    window.onload = onLoadHandler;
+
+    </script>
+
+</body>
+</html>

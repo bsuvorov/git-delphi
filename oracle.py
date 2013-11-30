@@ -5,6 +5,8 @@ import sys
 import json
 import cgi
 
+DEBUG = 0
+
 class changeDescription:
 	def __init__(self, message, author, date, impact, sha1):
 		self.message = message
@@ -59,19 +61,27 @@ def searchForTermWithLimit(term, limit):
 
 if __name__ == '__main__':
 
-	print 'Content-type: application/json\n\n'
+	print 'Status: 200'
+	print 'Content-type: application/json'
+	print 'Access-Control-Allow-Origin: *\n'
 	
+	
+	#print 'Content-type: application/json'
+	#print 'Access-Control-Allow-Origin: *\n'
 
 	# the query string, which contains the raw GET data
 	# (For example, for http://example.com/myscript.py?a=b&c=d&e
 	# this is "a=b&c=d&e")
 	form = cgi.FieldStorage()
-	print form
+	if DEBUG:
+		print form
 	searchTerm = "test"
 	if "searchterm" in form.keys():
 		searchTerm = form["searchterm"].value
 
-	print searchTerm
-	listOfChanges = searchForTermWithLimit(searchTerm, 5)
+	if DEBUG:
+		print searchTerm
+	listOfChanges = searchForTermWithLimit(searchTerm, 2)
 
-	print json.dumps(listOfChanges, default=encode_changeDesc, indent=4, separators=(',', ': '))
+	result = "{ \"commits\": " + json.dumps(listOfChanges, default=encode_changeDesc, indent=4, separators=(',', ': ')) + "}";
+	print result
