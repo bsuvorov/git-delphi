@@ -4,7 +4,10 @@
     <TITLE>My first HTML document</TITLE>
     <link rel="stylesheet" href="genesis.css"></head>
 <body>
-    <div id="placeholder">This will get replaced by handlebars.js</div>
+    <input class="delphiEntryField"  id="scriptBox" type="text" name="searchterm" onkeypress="return runScript(event)"/>
+    <br>
+    <br>
+    <div id="placeholder">Enter search term above for our git repos</div>
 
     <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/handlebars.js/1.0.rc.1/handlebars.min.js"></script>
     <script id="changeDescriptionTemplate" type="text/x-handlebars-template">
@@ -17,14 +20,13 @@
         </div>
         <div class="change_message">{{message}}</div>
         </div>
-        <br>
-        {{/commits}}
-    </script>
+        <br>{{/commits}}</script>
 
     <script type="text/javascript">
 
-    function fetchResults() {
-        var url = "http://localhost:8888/delphi/oracle.py?searchterm=registration";
+    function fetchResultsForSearchTerm(searchterm) {
+        var url = "http://localhost:8888/delphi/oracle.py?searchterm="+searchterm;
+        console.log(url)
         xmlHttp = new XMLHttpRequest();
         xmlHttp.onreadystatechange = processRequest;
         xmlHttp.open( "GET", url, true );
@@ -39,7 +41,16 @@
                 layoutSearchResultsWithData(xmlHttp.responseText);
             }                    
         }
-}
+    }
+
+
+    function runScript(e) {
+        if (e.keyCode == 13) {
+            var tb = document.getElementById("scriptBox");
+            fetchResultsForSearchTerm(tb.value)
+            return false;
+        }
+    }
 
     function layoutSearchResultsWithData(data) {
         console.log(data)
@@ -52,13 +63,7 @@
         var template = Handlebars.compile(source);            
         document.getElementById("placeholder").innerHTML = template(data);
     }
-
-    function onLoadHandler() {
-        fetchResults();
-    }
-
-    window.onload = onLoadHandler;
-
+    
     </script>
 
 </body>
