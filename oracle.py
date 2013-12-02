@@ -8,12 +8,13 @@ import cgi
 DEBUG = 0
 
 class changeDescription:
-	def __init__(self, message, author, date, impact, sha1):
+	def __init__(self, message, author, date, impact, sha1, reponame):
 		self.message = message
 		self.author = author
 		self.date = date
 		self.impact = impact
 		self.sha1 = sha1
+		self.reponame = reponame
 
 
 def encode_changeDesc(obj):
@@ -33,12 +34,13 @@ def searchForTermWithLimit(term, limit):
 	# Use all the SQL you like
 				
 	mySQLQuery = """SELECT * FROM 
-						(SELECT hexsha, author, authored_date, message, MATCH (message) AGAINST ('%s' IN NATURAL LANGUAGE MODE) as score
-						FROM GITHISTORY
+						(SELECT hexsha, author, authored_date, message, reponame, MATCH (message) AGAINST ('%s' IN NATURAL LANGUAGE MODE) as score
+						FROM GITHISTORY2
 						WHERE authored_date > '2012-01-01'
 						ORDER BY score DESC
 						LIMIT %s) a
-					WHERE score > 0""" % (term, limit)
+					WHERE score > 0
+					ORDER BY authored_date DESC""" % (term, limit)
 
 	cur.execute(mySQLQuery)
 	db.close()
@@ -52,9 +54,10 @@ def searchForTermWithLimit(term, limit):
 		# convert date to the timestamp
 		timestamp	= row[2].strftime('%s')
 		message 	= row[3]
-		impact 		= row[4]
-
-		changeDesc = changeDescription(message, author, timestamp, impact, sha1)
+		reponame	= row[4]
+		impact 		= row[5]
+	
+		changeDesc = changeDescription(message, author, timestamp, impact, sha1, reponame)
 		listOfChanges.append(changeDesc)
 
 	return listOfChanges
