@@ -4,6 +4,7 @@ import MySQLdb
 import sys
 import json
 import cgi
+from datetime import datetime
 
 DEBUG = 0
 
@@ -52,11 +53,15 @@ def searchForTermWithLimit(term, limit):
 		sha1 		= row[0]
 		author 		= row[1]
 		# convert date to the timestamp
-		timestamp	= row[2].strftime('%s')
+		timestamp	= row[2]
 		message 	= row[3]
 		reponame	= row[4]
 		impact 		= row[5]
 	
+		timestamp = (timestamp.strftime('%Y-%m-%d %H:%M:%S'))
+		
+		#print timestamp
+
 		changeDesc = changeDescription(message, author, timestamp, impact, sha1, reponame)
 		listOfChanges.append(changeDesc)
 
@@ -84,7 +89,7 @@ if __name__ == '__main__':
 
 	if DEBUG:
 		print searchTerm
-	listOfChanges = searchForTermWithLimit(searchTerm, 10)
+	listOfChanges = searchForTermWithLimit(searchTerm, 50)
 
 	result = "{ \"commits\": " + json.dumps(listOfChanges, default=encode_changeDesc, indent=4, separators=(',', ': ')) + "}";
 	print result
