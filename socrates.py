@@ -1,5 +1,6 @@
 #!/usr/bin/python
 import sys
+import git
 from git import *
 import peewee
 from peewee import *
@@ -18,11 +19,12 @@ class namedRepo():
     def __str__(self):
         return self.name + "/" + self.branch + " at " + self.path + " with SHA1" + self.lastSyncedSHA1
 
-    def __init__(self, path, name, branch, lastSyncedSHA1):
+    def __init__(self, path, name, branch, remoteBranch,lastSyncedSHA1):
         self.path = path
         self.name = name
         self.lastSyncedSHA1 = lastSyncedSHA1
         self.branch = branch
+        self.remoteBranch = remoteBranch
 
 class GitHistory2(peewee.Model):
     #hexsha = CharField(primary_key=True)
@@ -47,13 +49,14 @@ def parseConfFileAtPath(path):
             path = row[0]
             name = row[1]
             branch = row[2]
+            remoteBranch = row[3]
             lastSyncedSHA1 = ""
 
             if len(row) >= 4:
                 #sha1 is always last item
                 lastSyncedSHA1 = row[len(row)-1]
 
-            reposDict[path] = namedRepo(path, name, branch, lastSyncedSHA1)
+            reposDict[path] = namedRepo(path, name, branch, remoteBranch, lastSyncedSHA1)
 
     return reposDict
 
@@ -129,6 +132,13 @@ def saveGitCommitForNameRepoToSQL(db, commit, reponame):
     except:
         print "Ignoring ", commit.hexsha
 
+def updateRepos(reposToUpdate):
+    for namedRepo in reposToUpdate:
+        repo = git.cmd.Git(namedRepo.path)
+        print "started updating " + namedRepo.name + "at remote branch" + namedRepo.branch + str(datetime.now())
+        repo.fetch()
+        repo.reset("--hard", namedRepo.remoteBranch)
+        print "finished updating " + namedRepo.name + "at remote branch" + namedRepo.branch + str(datetime.now())
 
 def populate(reposToPopulate):
     db = DB()
@@ -196,6 +206,7 @@ if __name__ == '__main__':
     reposToPopulate = mergeConfAndLastSynRepos(confRepos, lastSyncRepos)
 
     print reposToPopulate
+    updateRepos(reposToPopulate)
     populate(reposToPopulate)
 
 
